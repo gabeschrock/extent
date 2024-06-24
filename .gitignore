@@ -1,2 +1,2 @@
-/crates/*/target
-/crates/*/Cargo.lock
+target/
+Cargo.lock
