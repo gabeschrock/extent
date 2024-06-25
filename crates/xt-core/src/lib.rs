@@ -1,21 +1,52 @@
 use xt_interface::*;
+use std::fmt::Debug;
 
-pub fn lex<T: ToString>(stringable: T, order: OperationOrder) -> Vec<Token> {
+pub enum ErrorKind {
+    TokenizeLoopError
+}
+
+pub struct Error {
+    kind: ErrorKind,
+}
+
+impl Error {
+    fn new(kind: ErrorKind) -> Error {
+        Error {
+            kind,
+        }
+    }
+}
+
+impl Debug for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        use ErrorKind::*;
+        write!(f, "{}", match &self.kind {
+            TokenizeLoopError => "An infinite loop was detected in the tokenizer"
+        })
+    }
+}
+
+pub fn lex<T: ToString>(stringable: T, order: OperationOrder) -> Result<Vec<Token>, Error> {
     let code = stringable.to_string();
 
     let mut lexer = Lexer {
         code,
-        indices: (0, 0),
+        index: 0,
         tokens: vec![],
     };
 
-    let mut done = false;
-    while !done {
-        for func in &order.lex {
-            done = func(&mut lexer);
-            if done { break; }
+    'top: loop {
+        let index = lexer.index;
+        for (_, func) in &order.lex {
+            func(&mut lexer);
+            if lexer.index >= lexer.code.len() {
+                break 'top;
+            }
+        }
+        if lexer.index == index {
+            return Err(Error::new(ErrorKind::TokenizeLoopError));
         }
     }
 
-    lexer.tokens
+    Ok(lexer.tokens)
 }
