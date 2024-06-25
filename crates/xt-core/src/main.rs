@@ -6,6 +6,6 @@ fn main() {
     let mut order = OperationOrder::new();
     init(&mut order);
 
-    let tokens = lex("hello world", order).unwrap();
+    let tokens = lex("(hello + world)", order).unwrap();
     println!("{tokens:#?}");
 }

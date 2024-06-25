@@ -1,10 +1,18 @@
 use std::fmt::Debug;
 
+pub const MAX_SYMBOL_LEN: usize = 1;
+
+#[cfg(target_pointer_width = "64")]
+pub type FSize = f64;
+
+#[cfg(target_pointer_width = "32")]
+pub type FSize = f32;
+
 #[derive(Debug)]
 pub enum Token {
     Ident(String),
     StringLiteral(String),
-    NumLiteral(f64),
+    NumLiteral(FSize),
     OtherToken(Box<dyn OtherToken>),
 
     // Punctuators
@@ -14,8 +22,8 @@ pub enum Token {
     // Operators
     Plus,
     Minus,
-    Slash,
     Star,
+    Slash,
 }
 
 #[derive(Debug)]
@@ -50,6 +58,19 @@ impl Token {
             if !Token::is_ident_char(c) { return false; }
         }
         true
+    }
+
+    pub fn symbol(string: &str) -> Option<Token> {
+        use Token::*;
+        return Some(match string {
+            "(" => LParen,
+            ")" => RParen,
+            "+" => Plus,
+            "-" => Minus,
+            "*" => Star,
+            "/" => Slash,
+            _   => return None,
+        })
     }
 }
 
