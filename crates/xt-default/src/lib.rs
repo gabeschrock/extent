@@ -49,7 +49,8 @@ fn lex_symbol(lexer: &mut Lexer) {
     }
 }
 
-pub fn init(order: &mut OperationOrder) {
+#[no_mangle]
+pub extern "Rust" fn init(order: &mut OperationOrder) {
     order.lex.push((LEX_IDENT,       lex_ident      ));
     order.lex.push((LEX_SYMBOL,      lex_symbol     ));
     order.lex.push((SKIP_WHITESPACE, skip_whitespace));

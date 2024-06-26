@@ -1,12 +1,14 @@
 use std::fmt::Debug;
 
-pub const MAX_SYMBOL_LEN: usize = 1;
+pub type LexerStep = fn(&mut Lexer);
 
 #[cfg(target_pointer_width = "64")]
 pub type FSize = f64;
 
 #[cfg(target_pointer_width = "32")]
 pub type FSize = f32;
+
+pub const MAX_SYMBOL_LEN: usize = 1;
 
 #[derive(Debug)]
 pub enum Token {
@@ -33,8 +35,9 @@ pub struct Lexer {
     pub tokens: Vec<Token>,
 }
 
+#[derive(Debug)]
 pub struct OperationOrder<'a> {
-    pub lex: Vec<(&'a str, fn(&mut Lexer))>
+    pub lex: Vec<(&'a str, LexerStep)>
 }
 
 pub trait OtherToken: Debug {}
@@ -49,7 +52,7 @@ impl Token {
     }
 
     pub fn is_ident(string: &str) -> bool {
-        if string.len() == 0 { return true; }
+        if string.is_empty() { return true; }
         let mut chars = string.chars();
         if !Token::is_ident_start_char(chars.next().unwrap()) {
             return false;
@@ -62,7 +65,7 @@ impl Token {
 
     pub fn symbol(string: &str) -> Option<Token> {
         use Token::*;
-        return Some(match string {
+        Some(match string {
             "(" => LParen,
             ")" => RParen,
             "+" => Plus,
@@ -79,5 +82,11 @@ impl<'a> OperationOrder<'a> {
         OperationOrder {
             lex: vec![],
         }
+    }
+}
+
+impl<'a> Default for OperationOrder<'a> {
+    fn default() -> Self {
+        Self::new()
     }
 }
