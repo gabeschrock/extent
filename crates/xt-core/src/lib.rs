@@ -1,28 +1,23 @@
 use xt_interface::*;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 
-pub enum ErrorKind {
-    TokenizeLoopError
+#[derive(Debug)]
+pub enum Error {
+    TokenNotAccepted
 }
 
-pub struct Error {
-    kind: ErrorKind,
-}
-
-impl Error {
-    fn new(kind: ErrorKind) -> Error {
-        Error {
-            kind,
-        }
+impl Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Debug::fmt(&self, f)
     }
 }
 
-impl Debug for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use ErrorKind::*;
-        write!(f, "{}", match &self.kind {
-            TokenizeLoopError => "An infinite loop was detected in the tokenizer"
-        })
+impl std::error::Error for Error {
+    fn description(&self) -> &str {
+        use Error::*;
+        match self {
+            TokenNotAccepted => "token not accepted"
+        }
     }
 }
 
@@ -37,14 +32,14 @@ pub fn lex<T: ToString>(stringable: T, order: OperationOrder) -> Result<Vec<Toke
 
     'top: loop {
         let index = lexer.index;
-        for (_, func) in &order.lex {
-            func(&mut lexer);
+        for step in &order.lex {
+            step.function()(&mut lexer);
             if lexer.index >= lexer.code.len() {
                 break 'top;
             }
         }
         if lexer.index == index {
-            return Err(Error::new(ErrorKind::TokenizeLoopError));
+            return Err(Error::TokenNotAccepted);
         }
     }
 

@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-pub type LexerStep = fn(&mut Lexer);
+pub type LexerStep<'a> = Step<'a, fn(&mut Lexer)>;
 
 #[cfg(target_pointer_width = "64")]
 pub type FSize = f64;
@@ -28,6 +28,77 @@ pub enum Token {
     Slash,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct StepOwner<'a> {
+    url: &'a str,
+    location: &'a str,
+    name: &'a str,
+}
+
+impl<'a> StepOwner<'a> {
+    pub fn new(url: &'a str, location: &'a str, name: &'a str) -> Self {
+        StepOwner {
+            url,
+            location,
+            name,
+        }
+    }
+
+    pub fn url(&self) -> &'a str {
+        self.url
+    }
+
+    pub fn location(&self) -> &'a str {
+        self.location
+    }
+
+    pub fn name(&self) -> &'a str {
+        self.name
+    }
+
+    pub fn new_name(&self, name: &'a str) -> Self {
+        Self {
+            name,
+            ..*self
+        }
+    }
+}
+
+impl<'a> Default for StepOwner<'a> {
+    fn default() -> Self {
+        Self::new("about:blank", "", "")
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct Step<'a, T> 
+where
+    T: Clone,
+{
+    owner: StepOwner<'a>,
+    function: T,
+}
+
+impl<'a, T> Step<'a, T>
+where 
+    T: Clone,
+{
+    pub fn new(owner: StepOwner<'a>, function: T) -> Self {
+        Self {
+            owner,
+            function,
+        }
+    }
+
+    pub fn owner(&self) -> StepOwner {
+        self.owner
+    }
+
+    pub fn function(&self) -> T {
+        self.function.clone()
+    }
+}
+
 #[derive(Debug)]
 pub struct Lexer {
     pub code: String,
@@ -37,7 +108,7 @@ pub struct Lexer {
 
 #[derive(Debug)]
 pub struct OperationOrder<'a> {
-    pub lex: Vec<(&'a str, LexerStep)>
+    pub lex: Vec<LexerStep<'a>>
 }
 
 pub trait OtherToken: Debug {}
@@ -78,7 +149,7 @@ impl Token {
 }
 
 impl<'a> OperationOrder<'a> {
-    pub fn new() -> OperationOrder<'a> {
+    pub fn new() -> Self {
         OperationOrder {
             lex: vec![],
         }
