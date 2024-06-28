@@ -12,14 +12,7 @@ impl Display for Error {
     }
 }
 
-impl std::error::Error for Error {
-    fn description(&self) -> &str {
-        use Error::*;
-        match self {
-            TokenNotAccepted => "token not accepted"
-        }
-    }
-}
+impl std::error::Error for Error {}
 
 pub fn lex<T: ToString>(stringable: T, order: OperationOrder) -> Result<Vec<Token>, Error> {
     let code = stringable.to_string();
