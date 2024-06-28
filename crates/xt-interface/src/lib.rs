@@ -195,7 +195,10 @@ pub struct OperationOrder<'a> {
     pub lex: Vec<LexerStep<'a>>
 }
 
-pub trait OtherToken: Debug {}
+pub trait OtherToken
+where
+    Self: Debug
+{}
 
 impl<'a> OperationOrder<'a> {
     pub fn new() -> Self {

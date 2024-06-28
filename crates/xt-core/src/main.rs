@@ -40,6 +40,6 @@ fn main() {
         init_func(&mut order);
     }
 
-    let tokens = lex("(hello + world * 2) - 7", order).unwrap();
+    let tokens = lex("(hello + world * 2) - 7", &order).unwrap();
     println!("{tokens:#?}");
 }

@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 xt-interface = { path = "../xt-interface" }
 libloading = "0.8.4"
+# for doc examples
+xt-default = { path = "../xt-default" }

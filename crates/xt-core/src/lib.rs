@@ -14,7 +14,21 @@ impl Display for Error {
 
 impl std::error::Error for Error {}
 
-pub fn lex<T: ToString>(stringable: T, order: OperationOrder) -> Result<Vec<Token>, Error> {
+/// Lex a string into tokens
+/// # Examples
+/// ```
+/// # extern crate xt_default;
+/// # use xt_core::lex;
+/// # use xt_interface::{OperationOrder, Token};
+/// let mut order = OperationOrder::new();
+/// xt_default::init(&mut order);
+/// let tokens = lex("(2 + 2) / 4", &order).unwrap();
+/// match &tokens[0] {
+///     Token::LParen => (),
+///     other => panic!("Parse unsuccessful: {other:?}"),
+/// }
+/// ```
+pub fn lex<T: ToString>(stringable: T, order: &OperationOrder) -> Result<Vec<Token>, Error> {
     let code = stringable.to_string();
 
     let mut lexer = Lexer {
