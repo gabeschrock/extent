@@ -17,7 +17,6 @@ impl std::error::Error for Error {}
 /// Lex a string into tokens
 /// # Examples
 /// ```
-/// # extern crate xt_default;
 /// # use xt_core::lex;
 /// # use xt_interface::{OperationOrder, Token};
 /// let mut order = OperationOrder::new();
